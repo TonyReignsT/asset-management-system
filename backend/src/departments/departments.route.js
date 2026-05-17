@@ -6,7 +6,7 @@ const {
     createDepartment,
     getDepartments,
     getDepartmentById
-} = require('../controllers/departmentController')
+} = require('../departments/departments.controller')
 
 
 

@@ -1,16 +1,12 @@
-// const userService = require('../services/userService')
-const User = require("../models/user");
-const mongoose = require('mongoose')
+const userService = require("./users.service");
+const User = require("../users/users.model");
+const mongoose = require("mongoose");
 
 // Create a user
 exports.createUser = async (req, res) => {
   try {
-    const newUser = new User(req.body);
-    const savedUser = await newUser.save();
-
-    // To avoid returning passwordHash in the response
-    const userResponse = savedUser.toObject(); // converts to plain js object
-    delete userResponse.passwordHash;
+    // passing the request data directly to the service layer
+    const savedUser = await userService.createUser(req.body);
 
     res.status(201).json({
       success: true,
@@ -37,11 +33,7 @@ exports.getUsers = async (req, res) => {
   try {
     // Yooh!! What if password is being updated? - Rem. to hash it. Ps. Reigns
 
-    // Finds users, populates department name, and excludes passwordHash from results
-    const users = await User.find()
-      .populate("departmentId", "name")
-      .select("-passwordHash");
-    // res.json(users)
+    const users = await userService.getUsers();
 
     res.status(200).json({
       success: true,
@@ -64,9 +56,7 @@ exports.getUserById = async (req, res) => {
       });
     }
 
-    const user = await User.findById(req.params.id)
-      .populate("departmentId", "name")
-      .select("-passwordHash");
+    const user = await userService.getUserById(req.params.id);
 
     if (!user) {
       return res.status(404).json({
@@ -90,10 +80,7 @@ exports.getUserById = async (req, res) => {
 // Updating User
 exports.updateUser = async (req, res) => {
   try {
-    const updateUser = await User.findByIdAndUpdate(req.params.id, req.body, {
-      new: true, // Returns the modified document
-      runValidators: true, // Enforces schema validations on update
-    }).select("-passwordHash");
+    const updateUser = await userService.updateUser(req.params.id, req.body);
 
     if (!updateUser) {
       return res.status(404).json({
@@ -116,7 +103,7 @@ exports.updateUser = async (req, res) => {
     }
     res.status(400).json({
       success: false,
-      error: error.mesage,
+      error: error.message,
     });
   }
 };
@@ -124,7 +111,7 @@ exports.updateUser = async (req, res) => {
 // Deleting a user
 exports.deleteUser = async (req, res) => {
   try {
-    const deleteUser = await User.findByIdAndDelete(req.params.id);
+    const deleteUser = await userService.deleteUser(req.params.id)
 
     if (!deleteUser) {
       return res.status(404).json({

@@ -1,5 +1,5 @@
 const mongoose = require("mongoose"); // for ObjectId validation
-const Department = require("../models/department");
+const Department = require("../departments/departments.model");
 
 // create a department
 exports.createDepartment = async (req, res) => {
